@@ -1,0 +1,47 @@
+{
+  "name": "open-matrix-guard",
+  "version": "1.0.0",
+  "description": "Multi-platform marketing risk-control, sensitive words inspector and anti-ban sanitizing MCP server for Xiaohongshu, Xianyu, and Reddit.",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "open-matrix-guard": "./bin/cli.js"
+  },
+  "type": "module",
+  "files": [
+    "dist",
+    "bin",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "prepare": "tsc",
+    "start": "node ./bin/cli.js",
+    "mcp": "node ./dist/mcp-server.js"
+  },
+  "keywords": [
+    "marketing",
+    "compliance",
+    "risk-control",
+    "anti-ban",
+    "xiaohongshu",
+    "goofish",
+    "xianyu",
+    "reddit",
+    "mcp",
+    "mcp-server",
+    "sensitive-words",
+    "ai-agent"
+  ],
+  "author": "MatrixGuard Open Source Community",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/domainsun/open-matrix-guard.git"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.5",
+    "typescript": "^5.7.3"
+  }
+}
