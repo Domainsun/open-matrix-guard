@@ -9,6 +9,7 @@ export async function runCli() {
       text: { type: "string", short: "t" },
       platform: { type: "string", short: "p", default: "goofish" },
       mcp: { type: "boolean", default: false },
+      json: { type: "boolean", default: false },
       help: { type: "boolean", short: "h", default: false },
       version: { type: "boolean", short: "v", default: false },
     },
@@ -21,7 +22,7 @@ export async function runCli() {
   }
 
   if (values.version) {
-    console.log("open-matrix-guard v1.0.0 (MIT License)");
+    console.log("open-matrix-guard v1.1.0 (MIT License)");
     return;
   }
 
@@ -31,12 +32,13 @@ export async function runCli() {
 ================================================================================
 
 Usage:
-  npx open-matrix-guard -t "<text>" [-p <platform>]
+  npx open-matrix-guard -t "<text>" [-p <platform>] [--json]
   npx open-matrix-guard --mcp
 
 Options:
   -t, --text <string>        Text content to inspect (e.g. promotional post, DM, comment)
   -p, --platform <string>    Target platform: goofish (闲鱼), xiaohongshu (小红书), reddit (Default: goofish)
+      --json                 Output result in structured JSON format (for CI/CD pipelines)
       --mcp                  Start stdio MCP Server (for Claude Desktop / Cursor / Windsurf)
   -h, --help                 Show this help message
   -v, --version              Show version info
@@ -50,38 +52,73 @@ Official Web SaaS & Google Accounts Hub:
   const content = values.text;
   const platform = (values.platform as any) || "goofish";
 
-  console.log(`\n🔍 Inspecting content for [${platform}]...`);
-
   // 尝试云端高级体检，回退至本地
   const cloudRes = await callCloudInspect({ content, platform });
   let result: any;
+  let source = "cloud";
 
   if (cloudRes.success && cloudRes.data) {
-    console.log("⚡ [Cloud Engine Connected] Using live real-time rule dictionary:");
     result = cloudRes.data;
+    source = "cloud";
   } else {
-    console.log("📦 [Local Engine] Using offline DFA state machine:");
     const local = localInspect(content, platform);
     result = {
       riskScore: local.riskScore,
       riskLevel: local.riskLevel,
       matchedWords: local.matches,
-      summary: local.tip
+      summary: local.tip,
     };
+    source = "local_dfa";
+  }
+
+  if (values.json) {
+    console.log(
+      JSON.stringify(
+        {
+          platform,
+          source,
+          ...result,
+          officialWebUrl: OFFICIAL_WEB_URL,
+        },
+        null,
+        2
+      )
+    );
+    return;
+  }
+
+  console.log(`\n🔍 Inspecting content for [${platform.toUpperCase()}]...`);
+  if (source === "cloud") {
+    console.log("⚡ [Cloud Engine Connected] Using live real-time rule dictionary:");
+  } else {
+    console.log("📦 [Local Engine] Using offline DFA state machine:");
   }
 
   console.log("--------------------------------------------------------------------------------");
-  console.log(`📊 Risk Score: ${result.riskScore}/100 [Level: ${result.riskLevel}]`);
+  const levelBadge =
+    result.riskLevel === "HIGH"
+      ? "🔴 HIGH (Severe Risk / Ban Warning)"
+      : result.riskLevel === "MEDIUM"
+      ? "🟡 MEDIUM (Shadowban Warning)"
+      : result.riskLevel === "LOW"
+      ? "🔵 LOW (Optimization Advised)"
+      : "🟢 SAFE (Compliant)";
+
+  console.log(`📊 Risk Score: ${result.riskScore}/100 [Level: ${levelBadge}]`);
   console.log(`📝 Summary:    ${result.summary}`);
   console.log("--------------------------------------------------------------------------------");
 
   if (result.matchedWords && result.matchedWords.length > 0) {
     console.log("⚠️  Matched Prohibited / High-Risk Words:");
     result.matchedWords.forEach((m: any, i: number) => {
-      console.log(`   ${i + 1}. [${m.word}] (${m.category}) -> Suggestion: ${m.suggestion}`);
+      console.log(`   ${i + 1}. [${m.word}] (${m.category})`);
+      console.log(`      💡 Suggestion: ${m.suggestion}`);
+      if (m.reason) {
+        console.log(`      ⚠️ Reason:     ${m.reason}`);
+      }
     });
   } else {
-    console.log("✅ No obvious prohibited phrases detected!");
+    console.log("✅ No prohibited phrases detected! Content meets standard platform guidelines.");
   }
 
   console.log(`
