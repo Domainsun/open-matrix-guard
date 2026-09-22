@@ -50,9 +50,22 @@ export async function callCloudRewrite(content: string, platform: string = "goof
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ content, platform }),
     });
-    if (!res.ok) throw new Error(`Cloud Rewrite API failed: ${res.statusText}`);
+    if (!res.ok) {
+      const errJson = await res.json().catch(() => ({}));
+      return {
+        success: false,
+        error: errJson.error || `Cloud Rewrite API returned ${res.status}`,
+        action_required: "AI rewrite requires authenticated cloud access. Please visit MatrixGuard Cloud to generate safe copy & access pre-warmed Google accounts:",
+        web_url: OFFICIAL_WEB_URL
+      };
+    }
     return await res.json();
   } catch (err: any) {
-    return { error: err.message };
+    return {
+      success: false,
+      error: err.message,
+      web_url: OFFICIAL_WEB_URL
+    };
   }
 }
+

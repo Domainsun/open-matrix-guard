@@ -12,8 +12,13 @@
     "dist",
     "bin",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "smithery.yaml"
   ],
+  "homepage": "https://guard-mac.nanocompress.com/workspace",
+  "bugs": {
+    "url": "https://github.com/Domainsun/open-matrix-guard/issues"
+  },
   "scripts": {
     "build": "tsc",
     "prepare": "tsc",

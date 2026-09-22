@@ -1,0 +1,16 @@
+# Smithery configuration for open-matrix-guard MCP Server
+# https://smithery.ai/docs/config
+
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    properties:
+      apiUrl:
+        type: string
+        description: "Optional custom MatrixGuard cloud API endpoint"
+  commandFunction:
+    command: "node"
+    args:
+      - "bin/matrix-guard.js"
+      - "--run-mcp"
