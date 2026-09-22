@@ -63,6 +63,12 @@ npx open-matrix-guard -t "Hey guys, buy now our service for sale at cheap price!
 
 # 4. CI/CD 或自动化流水线 JSON 输出
 npx open-matrix-guard -t "加我微信发货" -p goofish --json
+
+# 5. 一键在默认浏览器打开 MatrixGuard 官方云端工作台
+npx open-matrix-guard cloud
+
+# 6. 一键在默认浏览器查阅《出海防关联指纹浏览器 SOP 实操手册》
+npx open-matrix-guard sop
 ```
 
 终端输出示例：

@@ -4,7 +4,7 @@ import { startMcpServer } from "./mcp-server.js";
 import { parseArgs } from "node:util";
 
 export async function runCli() {
-  const { values } = parseArgs({
+  const { values, positionals } = parseArgs({
     options: {
       text: { type: "string", short: "t" },
       platform: { type: "string", short: "p", default: "goofish" },
@@ -16,13 +16,29 @@ export async function runCli() {
     allowPositionals: true,
   });
 
+  const cmd = positionals[0]?.toLowerCase();
+  if (cmd === "cloud" || cmd === "web") {
+    console.log(`🚀 Opening MatrixGuard Cloud Workbench: ${OFFICIAL_WEB_URL}`);
+    const { exec } = await import("node:child_process");
+    exec(`open "${OFFICIAL_WEB_URL}" 2>/dev/null || xdg-open "${OFFICIAL_WEB_URL}" 2>/dev/null`);
+    return;
+  }
+
+  if (cmd === "sop") {
+    const sopUrl = "https://guard-mac.nanocompress.com/sop";
+    console.log(`📖 Opening Anti-Ban Fingerprint SOP Guide: ${sopUrl}`);
+    const { exec } = await import("node:child_process");
+    exec(`open "${sopUrl}" 2>/dev/null || xdg-open "${sopUrl}" 2>/dev/null`);
+    return;
+  }
+
   if (values.mcp) {
     startMcpServer();
     return;
   }
 
   if (values.version) {
-    console.log("open-matrix-guard v1.1.0 (MIT License)");
+    console.log("open-matrix-guard v1.2.0 (MIT License)");
     return;
   }
 
@@ -34,6 +50,12 @@ export async function runCli() {
 Usage:
   npx open-matrix-guard -t "<text>" [-p <platform>] [--json]
   npx open-matrix-guard --mcp
+  npx open-matrix-guard cloud
+  npx open-matrix-guard sop
+
+Commands:
+  cloud                      Open official Cloud Workbench in default browser
+  sop                        Open anti-ban fingerprint SOP guide in default browser
 
 Options:
   -t, --text <string>        Text content to inspect (e.g. promotional post, DM, comment)
@@ -124,6 +146,8 @@ Official Web SaaS & Google Accounts Hub:
   console.log(`
 ================================================================================
 💡 Need full AI secret-code rewriting, accounts inventory & anti-ban fingerprint SOP?
-👉 Visit Official Web: ${OFFICIAL_WEB_URL}
+👉 Cloud Workbench: https://guard-mac.nanocompress.com/workspace
+👉 Anti-Ban SOP:   https://guard-mac.nanocompress.com/sop
+👉 Shortcut:       Run 'npx open-matrix-guard cloud' to open workbench
 ================================================================================\n`);
 }
